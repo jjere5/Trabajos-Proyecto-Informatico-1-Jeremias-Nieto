@@ -1,143 +1,214 @@
-#define POT_TIEMPO A3
-#define POT_ROJO A0
-#define POT_AZUL A1
-#define POT_VERDE A2
-
-#define BUZZER_PIN 8
-#define BOTON_PIN 12
-
-#define ROJO1 11
-#define AZUL1 9
-#define VERDE1 3
-
-#define ROJO2 10
-#define AZUL2 5
-#define VERDE2 6
-
-#define LED_ESTADO 13
-
-#define PARPADEOS 3
-
-float estadoBoton = 1;
-float anteriorBoton = 1;
-float pausaActiva = 0;
-float contadorParpadeo = 0;
-float tiempoActual = 0;
+int potenciometro;
+int tiempoesperar;
+int pricolor;
+int segcolor;
+int tercolor;
+int rojo1, verde2, azul3;
+int azul2, verde3;
+const int botonPin = 12;
+bool pausa = false;
+int tiemposegundos;
 
 void setup() {
   Serial.begin(9600);
-
-  pinMode(ROJO1, OUTPUT);
-  pinMode(AZUL1, OUTPUT);
-  pinMode(VERDE1, OUTPUT);
-  pinMode(ROJO2, OUTPUT);
-  pinMode(AZUL2, OUTPUT);
-  pinMode(VERDE2, OUTPUT);
-
-  pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(BOTON_PIN, INPUT_PULLUP);
-  pinMode(LED_ESTADO, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(13, OUTPUT);
+  pinMode(botonPin, INPUT_PULLUP);
 }
 
 void loop() {
-  estadoBoton = digitalRead(BOTON_PIN);
-  pausaActiva = pausaActiva + (estadoBoton == 0 && anteriorBoton == 1);
-  pausaActiva = fmod(pausaActiva, 2);
-  anteriorBoton = estadoBoton;
-
-  digitalWrite(LED_ESTADO, pausaActiva == 0);
-
-  float tiempoRaw = analogRead(POT_TIEMPO);
-  float tiempoMs = (tiempoRaw * 3000.0) / 1023.0;
-  float tiempoSegundos = tiempoMs / 1000.0;
-
-  float rojoVal = analogRead(POT_ROJO) * 255.0 / 1023.0;
-  float azulVal = analogRead(POT_AZUL) * 255.0 / 1023.0;
-  float verdeVal = analogRead(POT_VERDE) * 255.0 / 1023.0;
+  tiemposegundos = tiempoesperar / 100;
+  Serial.print("rojo: ");
+  Serial.println(rojo1);
+  Serial.print("azul: ");
+  Serial.println(azul2);
+  Serial.print("verde: ");
+  Serial.println(verde3);
 
   Serial.print("Tiempo: ");
-  Serial.println(tiempoSegundos, 2);
-  Serial.print("R: ");
-  Serial.println((int)rojoVal);
-  Serial.print("G: ");
-  Serial.println((int)verdeVal);
-  Serial.print("B: ");
-  Serial.println((int)azulVal);
+  Serial.println(tiemposegundos);
+  potenciometro = analogRead(A3);
+  tiempoesperar = potenciometro / 3.33;
 
-  digitalWrite(BUZZER_PIN, HIGH);
-  delay(100);
-  digitalWrite(BUZZER_PIN, LOW);
-
-  analogWrite(ROJO1, rojoVal);
-  analogWrite(VERDE1, verdeVal);
-  analogWrite(AZUL1, azulVal);
-  analogWrite(ROJO2, rojoVal);
-  analogWrite(VERDE2, verdeVal);
-  analogWrite(AZUL2, azulVal);
-
-  tiempoActual = 0;
-  while (tiempoActual < tiempoMs && pausaActiva == 0) {
-    delay(50);
-    tiempoActual = tiempoActual + 50;
-    estadoBoton = digitalRead(BOTON_PIN);
-    pausaActiva = pausaActiva + (estadoBoton == 0 && anteriorBoton == 1);
-    pausaActiva = fmod(pausaActiva, 2);
-    anteriorBoton = estadoBoton;
+  if (digitalRead(botonPin) == LOW) {
+    digitalWrite(13, LOW);
+    Serial.println("Pausa activada");
+    while (digitalRead(botonPin) == LOW) {
+      delay(50);
+    }
+    Serial.println("Pausa desactivada");
+    delay(200);
   }
+  digitalWrite(13, HIGH);
 
-  analogWrite(ROJO1, 0);
-  analogWrite(VERDE1, 0);
-  analogWrite(AZUL1, 0);
-  analogWrite(ROJO2, 0);
-  analogWrite(VERDE2, 0);
-  analogWrite(AZUL2, 0);
+  digitalWrite(13, LOW);
+  analogWrite(11, 255);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  delay(tiempoesperar);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  digitalWrite(13, HIGH);
+  delay(200);
 
-  contadorParpadeo = 0;
-  contadorParpadeo = contadorParpadeo + 1;
-  analogWrite(ROJO1, rojoVal);
-  analogWrite(VERDE1, verdeVal);
-  analogWrite(AZUL1, azulVal);
-  analogWrite(ROJO2, rojoVal);
-  analogWrite(VERDE2, verdeVal);
-  analogWrite(AZUL2, azulVal);
-  delay(100);
-  analogWrite(ROJO1, 0);
-  analogWrite(VERDE1, 0);
-  analogWrite(AZUL1, 0);
-  analogWrite(ROJO2, 0);
-  analogWrite(VERDE2, 0);
-  analogWrite(AZUL2, 0);
-  delay(100);
+  if (digitalRead(botonPin) == LOW) {
+    digitalWrite(13, LOW);
+    Serial.println("Pausa activada");
+    while (digitalRead(botonPin) == LOW) {
+      delay(50);
+    }
+    Serial.println("Pausa desactivada");
+    delay(200);
+  }
+  digitalWrite(13, HIGH);
 
-  contadorParpadeo = contadorParpadeo + 1;
-  analogWrite(ROJO1, rojoVal);
-  analogWrite(VERDE1, verdeVal);
-  analogWrite(AZUL1, azulVal);
-  analogWrite(ROJO2, rojoVal);
-  analogWrite(VERDE2, verdeVal);
-  analogWrite(AZUL2, azulVal);
-  delay(100);
-  analogWrite(ROJO1, 0);
-  analogWrite(VERDE1, 0);
-  analogWrite(AZUL1, 0);
-  analogWrite(ROJO2, 0);
-  analogWrite(VERDE2, 0);
-  analogWrite(AZUL2, 0);
-  delay(100);
+  pricolor = analogRead(A0);
+  rojo1 = ((long)pricolor * 255) / 1023;
+  segcolor = analogRead(A1);
+  azul2 = ((long)segcolor * 255) / 1023;
+  tercolor = analogRead(A2);
+  verde3 = ((long)tercolor * 255) / 1023;
 
-  contadorParpadeo = contadorParpadeo + 1;
-  analogWrite(ROJO1, rojoVal);
-  analogWrite(VERDE1, verdeVal);
-  analogWrite(AZUL1, azulVal);
-  analogWrite(ROJO2, rojoVal);
-  analogWrite(VERDE2, verdeVal);
-  analogWrite(AZUL2, azulVal);
-  delay(100);
-  analogWrite(ROJO1, 0);
-  analogWrite(VERDE1, 0);
-  analogWrite(AZUL1, 0);
-  analogWrite(ROJO2, 0);
-  analogWrite(VERDE2, 0);
-  analogWrite(AZUL2, 0);
-  delay(100);
+  analogWrite(11, rojo1);
+  analogWrite(9, azul2);
+  analogWrite(3, verde3);
+  analogWrite(10, rojo1);
+  analogWrite(5, azul2);
+  analogWrite(6, verde3);
+  delay(200);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  analogWrite(10, 0);
+  analogWrite(5, 0);
+  analogWrite(6, 0);
+  delay(200);
+  analogWrite(11, rojo1);
+  analogWrite(9, azul2);
+  analogWrite(3, verde3);
+  analogWrite(10, rojo1);
+  analogWrite(5, azul2);
+  analogWrite(6, verde3);
+  delay(200);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  analogWrite(10, 0);
+  analogWrite(5, 0);
+  analogWrite(6, 0);
+  delay(200);
+  analogWrite(11, rojo1);
+  analogWrite(9, azul2);
+  analogWrite(3, verde3);
+  analogWrite(10, rojo1);
+  analogWrite(5, azul2);
+  analogWrite(6, verde3);
+  delay(200);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  analogWrite(10, 0);
+  analogWrite(5, 0);
+  analogWrite(6, 0);
+  delay(200);
+
+  if (digitalRead(botonPin) == LOW) {
+    digitalWrite(13, LOW);
+    Serial.println("Pausa activada");
+    while (digitalRead(botonPin) == LOW) {
+      delay(50);
+    }
+    Serial.println("Pausa desactivada");
+    delay(200);
+  }
+  digitalWrite(13, HIGH);
+
+  digitalWrite(13, LOW);
+  digitalWrite(10, HIGH);
+  digitalWrite(5, HIGH);
+  digitalWrite(6, LOW);
+  delay(tiempoesperar);
+  digitalWrite(10, LOW);
+  digitalWrite(5, LOW);
+  digitalWrite(6, LOW);
+  digitalWrite(13, HIGH);
+  delay(200);
+
+  if (digitalRead(botonPin) == LOW) {
+    digitalWrite(13, LOW);
+    Serial.println("Pausa activada");
+    while (digitalRead(botonPin) == LOW) {
+      delay(50);
+    }
+    Serial.println("Pausa desactivada");
+    delay(200);
+  }
+  digitalWrite(13, HIGH);
+
+  pricolor = analogRead(A0);
+  rojo1 = ((long)pricolor * 255) / 1023;
+  segcolor = analogRead(A1);
+  azul2 = ((long)segcolor * 255) / 1023;
+  tercolor = analogRead(A2);
+  verde3 = ((long)tercolor * 255) / 1023;
+
+  analogWrite(11, rojo1);
+  analogWrite(9, azul2);
+  analogWrite(3, verde3);
+  analogWrite(10, rojo1);
+  analogWrite(5, azul2);
+  analogWrite(6, verde3);
+  delay(200);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  analogWrite(10, 0);
+  analogWrite(5, 0);
+  analogWrite(6, 0);
+  delay(200);
+  analogWrite(11, rojo1);
+  analogWrite(9, azul2);
+  analogWrite(3, verde3);
+  analogWrite(10, rojo1);
+  analogWrite(5, azul2);
+  analogWrite(6, verde3);
+  delay(200);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  analogWrite(10, 0);
+  analogWrite(5, 0);
+  analogWrite(6, 0);
+  delay(200);
+  analogWrite(11, rojo1);
+  analogWrite(9, azul2);
+  analogWrite(3, verde3);
+  analogWrite(10, rojo1);
+  analogWrite(5, azul2);
+  analogWrite(6, verde3);
+  delay(200);
+  analogWrite(11, 0);
+  analogWrite(9, 0);
+  analogWrite(3, 0);
+  analogWrite(10, 0);
+  analogWrite(5, 0);
+  analogWrite(6, 0);
+  delay(200);
+
+  if (digitalRead(botonPin) == LOW) {
+    digitalWrite(13, LOW);
+    Serial.println("Pausa activada");
+    while (digitalRead(botonPin) == LOW) {
+      delay(50);
+    }
+    Serial.println("Pausa desactivada");
+    delay(200);
+  }
+  digitalWrite(13, HIGH);
 }
