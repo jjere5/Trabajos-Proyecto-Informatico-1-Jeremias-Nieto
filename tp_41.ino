@@ -1,69 +1,67 @@
-#define SENSOR_LUZ  A1
+#define SENSOR_LUZ A1
 #define SENSOR_TEMP A0
-#define ROJO     3
-#define VERDE    6
-#define AZUL     5
+
+#define ROJO 3
+#define AZUL 5
+#define VERDE 6
 
 #define TEMP_MIN 18
 #define TEMP_MAX 90
 
-void setup() {
-  pinMode(SENSOR_TEMP, INPUT);
-  pinMode(SENSOR_LUZ, INPUT);
-  pinMode(ROJO, OUTPUT);
-  pinMode(VERDE, OUTPUT);
-  pinMode(AZUL, OUTPUT);
+const int LDR_VALOR_OSCURIDAD_CALIBRADO = 1;
+const int LDR_VALOR_LUZ_CALIBRADO = 310;
 
+void setup() {
   Serial.begin(9600);
+
+  pinMode(ROJO, OUTPUT);
+  pinMode(AZUL, OUTPUT);
+  pinMode(VERDE, OUTPUT);
+
+  digitalWrite(ROJO, HIGH);
+  digitalWrite(AZUL, HIGH);
+  digitalWrite(VERDE, HIGH);
+  delay(100);
 }
 
 void loop() {
   int valorTemp = analogRead(SENSOR_TEMP);
-  float temperatura = (valorTemp * 5.0 / 1023.0 - 0.5) * 100.0;
-
-  Serial.print("La temperatura actual es: ");
-  Serial.print(temperatura);
-  Serial.println(" ºC");
+  float temperatura = (valorTemp * 5.0) / 1024.0;
+  temperatura = (temperatura - 0.5) * 100.0;
 
   int valorLuz = analogRead(SENSOR_LUZ);
-  int luzInvertida = map(valorLuz, 6, 676, 100, 0);
+  int porcentajeLuz = map(valorLuz, LDR_VALOR_OSCURIDAD_CALIBRADO, LDR_VALOR_LUZ_CALIBRADO, 100, 0);
+  porcentajeLuz = constrain(porcentajeLuz, 0, 100);
 
   Serial.print("El nivel de luz actual es: ");
-  Serial.print(luzInvertida);
+  Serial.print(porcentajeLuz);
   Serial.println(" %");
 
-  digitalWrite(ROJO, LOW);
-  digitalWrite(VERDE, LOW);
-  digitalWrite(AZUL, LOW);
-  
-  if (luzInvertida> 30 && luzInvertida<70) { 
+  Serial.print("La temperatura actual es: ");
+  Serial.print(temperatura, 1);
+  Serial.println(" ºC");
 
-    if (temperatura > 90) {
-    digitalWrite(ROJO, HIGH);
-     digitalWrite(VERDE, LOW);
-  digitalWrite(AZUL, LOW);
+  digitalWrite(ROJO, HIGH);
+  digitalWrite(AZUL, HIGH);
+  digitalWrite(VERDE, HIGH);
 
-    
+  if (porcentajeLuz >= 30 && porcentajeLuz <= 70) {
+    if (temperatura > TEMP_MAX) {
+      digitalWrite(ROJO, HIGH);
+      digitalWrite(AZUL, LOW);
+      digitalWrite(VERDE, LOW);
+    }  
+    if (temperatura < TEMP_MIN) {
+      digitalWrite(ROJO, LOW);
+      digitalWrite(AZUL, HIGH);
+      digitalWrite(VERDE, LOW);
+    } 
+    if(temperatura < TEMP_MAX && temperatura > TEMP_MIN) { 
+      digitalWrite(ROJO, LOW);
+      digitalWrite(AZUL, LOW);
+      digitalWrite(VERDE, HIGH);
+    }
   } 
-  if (temperatura < 10) {
-    digitalWrite(AZUL, HIGH);
-     digitalWrite(ROJO, LOW);
-    digitalWrite(VERDE, LOW);
-  } 
-  if (temperatura >= 18 && temperatura <= 90){
-    digitalWrite(VERDE, HIGH);
-     digitalWrite(ROJO, LOW);
-    digitalWrite(AZUL, LOW);
-  }
 
- 
-  
-  if ( SENSOR_LUZ <0) {
-  digitalWrite(ROJO, LOW);
-  digitalWrite(VERDE, LOW);
-  digitalWrite(AZUL, LOW);
-
-  }
-     delay(1000);
-  }
+  delay(1000);
 }
