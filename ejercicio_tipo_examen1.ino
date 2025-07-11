@@ -1,78 +1,85 @@
-#define rojoled 13
-#define azulled 12
-#define verdeled 11
+#define rojoled 11
+#define azulled 10
+#define verdeled 9
 #define alarma 4
 #define trig 2
 #define echo 3
-#define boton 5
-int contador = 0;
-bool alarmaActiva = false;
-
+bool boton = false;
 
 void setup() {
   pinMode(rojoled, OUTPUT);
   pinMode(azulled, OUTPUT);
   pinMode(verdeled, OUTPUT);
   pinMode(alarma, OUTPUT);
-  pinMode(boton, INPUT_PULLUP); 
+  pinMode(5, INPUT_PULLUP);
   pinMode(trig, OUTPUT);
   pinMode(echo, INPUT);
   Serial.begin(9600);
 }
 
-void loop() {
-  
 
-  //distancia
+
+
+void loop() {
+  //Medición de Distancia Ultrasónica
   digitalWrite(trig, LOW);
   delayMicroseconds(2);
-  
-  digitalWrite( trig, HIGH);
+  digitalWrite(trig, HIGH);
   delayMicroseconds(10);
-  digitalWrite( trig, LOW);
+  digitalWrite(trig, LOW);
+
+  float tiempo = pulseIn(echo, HIGH);
+  float distanciaCm = tiempo / 58.3;
+
   
-  float tiempo = pulseIn( echo , HIGH );
-  float distancia = tiempo / 58.3;
   
+  if (digitalRead(5) == LOW) {
+  boton = !boton;
+    delay(10);
+  }
   
-  if (digitalRead(boton) == LOW ) {
-    contador = 1 + contador;
-    delay(200);
+   if (boton == false) {
+    digitalWrite(azulled, HIGH);
+    digitalWrite(verdeled, LOW);
+   digitalWrite(rojoled, LOW);
+     digitalWrite (alarma, LOW);
+  }
+  else {
+    digitalWrite(verdeled, HIGH);
+    digitalWrite(azulled, LOW);
+    digitalWrite(rojoled, LOW);
+   
+    if ((distanciaCm <= 150.0) && (distanciaCm >= 50)) {
+     
+    analogWrite(verdeled, 165);
+    analogWrite(rojoled, 255);
+      delay(250);
+    digitalWrite (alarma, HIGH);
+       delay(250);
+       digitalWrite (alarma, LOW);
+     
+    }
+     
+    if (distanciaCm < 50) {
+      analogWrite(verdeled, 0);
+       analogWrite(rojoled, 255);
+      digitalWrite (alarma, LOW);
+      delay(100);
+       digitalWrite (alarma, HIGH);
+      delay(100);
+     
+      }
+  }
+  Serial.print("Distancia: ");
+  Serial.print(distanciaCm);
+  Serial.println(" cm");
+
+  if ((distanciaCm <= 150.0) && (distanciaCm >= 50)) {
+    Serial.println("¡Precaucion!");
+  }
+  if (distanciaCm < 50.0) {
+    Serial.println("¡¡PELIGRO!!");
   }
 
-  if (contador == 1 && digitalRead(boton) == LOW) {
-    digitalWrite(alarma, HIGH);
-    Serial.println("Alarma: ACTIVADA");
-    
-  }
- 
-  
-  if (contador ==0) {
-    digitalWrite(alarma, LOW);
-    Serial.println("Alarma: DESACTIVADA");
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  delay(500);
 }
